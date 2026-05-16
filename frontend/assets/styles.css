@@ -1,0 +1,77 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+/* Base Theme */
+html, body, [class*="css"] { font-family: 'Inter', sans-serif; font-weight: 400; }
+.stApp { background-color: #09090b; }
+.main { background-color: #09090b; color: #fafafa; }
+
+/* Typography Overrides */
+h1, h2, h3, h4, h5, h6 { font-weight: 500 !important; letter-spacing: -0.02em !important; }
+
+/* Sidebar */
+[data-testid="stSidebar"] {
+    background-color: #09090b !important;
+    border-right: 1px solid #27272a;
+}
+[data-testid="stSidebarNav"] span { font-size: 0.9rem; font-weight: 500; color: #a1a1aa; }
+
+/* Hero Component */
+.hero-card {
+    background: linear-gradient(180deg, #18181b 0%, #09090b 100%);
+    border: 1px solid #27272a;
+    border-radius: 12px; padding: 48px; margin-bottom: 32px;
+}
+.hero-card h1 { color: #fafafa; font-size: 2.5rem; font-weight: 600; margin: 0; letter-spacing: -0.03em; }
+.hero-card p  { color: #a1a1aa; font-size: 1.1rem; margin-top: 16px; line-height: 1.6; }
+
+/* Metric Cards */
+.metric-card {
+    background-color: #09090b;
+    border: 1px solid #27272a;
+    border-radius: 12px; padding: 24px; text-align: left;
+    transition: border-color 0.2s ease;
+}
+.metric-card:hover { border-color: #3f3f46; }
+.metric-card h2 { font-size: 2.25rem; font-weight: 500; margin: 0; color: #fafafa; letter-spacing: -0.04em; }
+.metric-card p  { color: #71717a; margin: 8px 0 0 0; font-size: 0.8rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+
+/* Prediction Results */
+.predict-result {
+    border-radius: 12px; padding: 32px; text-align: left;
+    margin: 24px 0; border: 1px solid #27272a;
+}
+.result-fail      { background-color: #1e1010; border-color: #451a1a; }
+.result-pass      { background-color: #1e150a; border-color: #452912; }
+.result-excellent { background-color: #0f1c16; border-color: #163e26; }
+
+.result-label { font-size: 2rem; font-weight: 500; color: #fafafa; letter-spacing: -0.03em; }
+.result-conf  { font-size: 1rem; color: #a1a1aa; margin-top: 8px; font-weight: 400; }
+
+/* Section Headers */
+.section-header {
+    font-size: 1.5rem; font-weight: 500; color: #fafafa;
+    margin: 48px 0 24px; letter-spacing: -0.02em;
+    padding-bottom: 12px; border-bottom: 1px solid #27272a;
+}
+
+/* Forms & Inputs */
+label { color: #a1a1aa !important; font-size: 0.85rem !important; font-weight: 500 !important; }
+.stSelectbox div[data-baseweb="select"] > div { 
+    background-color: #18181b; border: 1px solid #27272a; border-radius: 8px; 
+}
+.stNumberInput input { 
+    background-color: #18181b; border: 1px solid #27272a; border-radius: 8px; color: #fafafa;
+}
+
+/* Primary Button */
+.stButton > button {
+    background-color: #fafafa; color: #09090b; 
+    border: none; border-radius: 8px;
+    padding: 12px 24px; font-weight: 500; font-size: 0.95rem;
+    width: 100%; transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+.stButton > button:hover { opacity: 0.9; transform: translateY(-1px); }
+
+/* Dividers */
+hr { border-color: #27272a; }

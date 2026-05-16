@@ -1,0 +1,305 @@
+[
+  {
+    "id": "48614ea3",
+    "input": {
+      "school": "MS",
+      "sex": "M",
+      "age": 17,
+      "address": "R",
+      "famsize": "LE3",
+      "Pstatus": "T",
+      "Medu": 3,
+      "Fedu": 2,
+      "Mjob": "at_home",
+      "Fjob": "other",
+      "reason": "course",
+      "guardian": "mother",
+      "traveltime": 1,
+      "studytime": 1,
+      "failures": 1,
+      "schoolsup": "no",
+      "famsup": "yes",
+      "paid": "no",
+      "activities": "no",
+      "nursery": "yes",
+      "higher": "yes",
+      "internet": "yes",
+      "romantic": "no",
+      "famrel": 4,
+      "freetime": 3,
+      "goout": 3,
+      "Dalc": 1,
+      "Walc": 1,
+      "health": 3,
+      "absences": 30,
+      "G1": 10,
+      "G2": 10
+    },
+    "result": {
+      "predicted_class": 1,
+      "predicted_label": "Pass",
+      "confidence": 97.9,
+      "probabilities": {
+        "Fail": 2.1,
+        "Pass": 97.9,
+        "Excellent": 0.0
+      },
+      "top_features": [
+        {
+          "feature": "G2",
+          "importance": 0.8576,
+          "rank": 1
+        },
+        {
+          "feature": "absences",
+          "importance": 0.0141,
+          "rank": 2
+        },
+        {
+          "feature": "Fjob",
+          "importance": 0.0138,
+          "rank": 3
+        },
+        {
+          "feature": "G1",
+          "importance": 0.0131,
+          "rank": 4
+        },
+        {
+          "feature": "traveltime",
+          "importance": 0.0129,
+          "rank": 5
+        },
+        {
+          "feature": "age",
+          "importance": 0.01,
+          "rank": 6
+        },
+        {
+          "feature": "health",
+          "importance": 0.01,
+          "rank": 7
+        },
+        {
+          "feature": "Fedu",
+          "importance": 0.0058,
+          "rank": 8
+        },
+        {
+          "feature": "failures",
+          "importance": 0.0057,
+          "rank": 9
+        },
+        {
+          "feature": "Mjob",
+          "importance": 0.0055,
+          "rank": 10
+        }
+      ],
+      "timestamp": "2026-05-14T12:32:59.015301"
+    },
+    "timestamp": "2026-05-14T12:32:59.017875"
+  },
+  {
+    "id": "2b629152",
+    "input": {
+      "school": "GP",
+      "sex": "M",
+      "age": 17,
+      "address": "U",
+      "famsize": "GT3",
+      "Pstatus": "T",
+      "Medu": 2,
+      "Fedu": 2,
+      "Mjob": "teacher",
+      "Fjob": "teacher",
+      "reason": "course",
+      "guardian": "mother",
+      "traveltime": 1,
+      "studytime": 3,
+      "failures": 0,
+      "schoolsup": "no",
+      "famsup": "yes",
+      "paid": "no",
+      "activities": "no",
+      "nursery": "yes",
+      "higher": "yes",
+      "internet": "yes",
+      "romantic": "no",
+      "famrel": 4,
+      "freetime": 3,
+      "goout": 3,
+      "Dalc": 1,
+      "Walc": 1,
+      "health": 3,
+      "absences": 2,
+      "G1": 14,
+      "G2": 16
+    },
+    "result": {
+      "predicted_class": 2,
+      "predicted_label": "Excellent",
+      "confidence": 100.0,
+      "probabilities": {
+        "Fail": 0.0,
+        "Pass": 0.0,
+        "Excellent": 100.0
+      },
+      "top_features": [
+        {
+          "feature": "G2",
+          "importance": 0.8576,
+          "rank": 1
+        },
+        {
+          "feature": "absences",
+          "importance": 0.0141,
+          "rank": 2
+        },
+        {
+          "feature": "Fjob",
+          "importance": 0.0138,
+          "rank": 3
+        },
+        {
+          "feature": "G1",
+          "importance": 0.0131,
+          "rank": 4
+        },
+        {
+          "feature": "traveltime",
+          "importance": 0.0129,
+          "rank": 5
+        },
+        {
+          "feature": "age",
+          "importance": 0.01,
+          "rank": 6
+        },
+        {
+          "feature": "health",
+          "importance": 0.01,
+          "rank": 7
+        },
+        {
+          "feature": "Fedu",
+          "importance": 0.0058,
+          "rank": 8
+        },
+        {
+          "feature": "failures",
+          "importance": 0.0057,
+          "rank": 9
+        },
+        {
+          "feature": "Mjob",
+          "importance": 0.0055,
+          "rank": 10
+        }
+      ],
+      "timestamp": "2026-05-14T10:52:32.156313"
+    },
+    "timestamp": "2026-05-14T10:52:32.158078"
+  },
+  {
+    "id": "60e6f7d7",
+    "input": {
+      "school": "GP",
+      "sex": "M",
+      "age": 17,
+      "address": "U",
+      "famsize": "GT3",
+      "Pstatus": "T",
+      "Medu": 2,
+      "Fedu": 2,
+      "Mjob": "teacher",
+      "Fjob": "teacher",
+      "reason": "course",
+      "guardian": "mother",
+      "traveltime": 1,
+      "studytime": 3,
+      "failures": 0,
+      "schoolsup": "no",
+      "famsup": "yes",
+      "paid": "no",
+      "activities": "no",
+      "nursery": "yes",
+      "higher": "yes",
+      "internet": "yes",
+      "romantic": "no",
+      "famrel": 4,
+      "freetime": 3,
+      "goout": 3,
+      "Dalc": 1,
+      "Walc": 1,
+      "health": 3,
+      "absences": 2,
+      "G1": 14,
+      "G2": 16
+    },
+    "result": {
+      "predicted_class": 2,
+      "predicted_label": "Excellent",
+      "confidence": 100.0,
+      "probabilities": {
+        "Fail": 0.0,
+        "Pass": 0.0,
+        "Excellent": 100.0
+      },
+      "top_features": [
+        {
+          "feature": "G2",
+          "importance": 0.8576,
+          "rank": 1
+        },
+        {
+          "feature": "absences",
+          "importance": 0.0141,
+          "rank": 2
+        },
+        {
+          "feature": "Fjob",
+          "importance": 0.0138,
+          "rank": 3
+        },
+        {
+          "feature": "G1",
+          "importance": 0.0131,
+          "rank": 4
+        },
+        {
+          "feature": "traveltime",
+          "importance": 0.0129,
+          "rank": 5
+        },
+        {
+          "feature": "age",
+          "importance": 0.01,
+          "rank": 6
+        },
+        {
+          "feature": "health",
+          "importance": 0.01,
+          "rank": 7
+        },
+        {
+          "feature": "Fedu",
+          "importance": 0.0058,
+          "rank": 8
+        },
+        {
+          "feature": "failures",
+          "importance": 0.0057,
+          "rank": 9
+        },
+        {
+          "feature": "Mjob",
+          "importance": 0.0055,
+          "rank": 10
+        }
+      ],
+      "timestamp": "2026-05-14T10:52:14.589417"
+    },
+    "timestamp": "2026-05-14T10:52:14.592438"
+  }
+]

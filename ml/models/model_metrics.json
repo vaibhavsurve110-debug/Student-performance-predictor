@@ -1,0 +1,52 @@
+[
+  {
+    "name": "Random Forest",
+    "accuracy": 91.4,
+    "precision": 91.7,
+    "recall": 91.4,
+    "f1_score": 91.4,
+    "cv_mean": 92.2,
+    "cv_std": 2.52,
+    "notes": "Best overall \u2014 recommended"
+  },
+  {
+    "name": "Gradient Boosting",
+    "accuracy": 93.1,
+    "precision": 93.3,
+    "recall": 93.1,
+    "f1_score": 93.2,
+    "cv_mean": 92.0,
+    "cv_std": 2.24,
+    "notes": "Strong; slower to train"
+  },
+  {
+    "name": "Decision Tree",
+    "accuracy": 91.4,
+    "precision": 91.7,
+    "recall": 91.4,
+    "f1_score": 91.4,
+    "cv_mean": 89.6,
+    "cv_std": 1.77,
+    "notes": "Interpretable, prone to overfit"
+  },
+  {
+    "name": "SVM",
+    "accuracy": 86.2,
+    "precision": 85.9,
+    "recall": 86.2,
+    "f1_score": 86.0,
+    "cv_mean": 80.9,
+    "cv_std": 5.48,
+    "notes": "Good with scaled features"
+  },
+  {
+    "name": "Logistic Regression",
+    "accuracy": 87.1,
+    "precision": 87.4,
+    "recall": 87.1,
+    "f1_score": 86.6,
+    "cv_mean": 82.6,
+    "cv_std": 4.56,
+    "notes": "Baseline; fast training"
+  }
+]

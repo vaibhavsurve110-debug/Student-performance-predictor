@@ -1,0 +1,162 @@
+[
+  {
+    "feature": "G2",
+    "importance": 0.8576,
+    "rank": 1
+  },
+  {
+    "feature": "absences",
+    "importance": 0.0141,
+    "rank": 2
+  },
+  {
+    "feature": "Fjob",
+    "importance": 0.0138,
+    "rank": 3
+  },
+  {
+    "feature": "G1",
+    "importance": 0.0131,
+    "rank": 4
+  },
+  {
+    "feature": "traveltime",
+    "importance": 0.0129,
+    "rank": 5
+  },
+  {
+    "feature": "age",
+    "importance": 0.01,
+    "rank": 6
+  },
+  {
+    "feature": "health",
+    "importance": 0.01,
+    "rank": 7
+  },
+  {
+    "feature": "Fedu",
+    "importance": 0.0058,
+    "rank": 8
+  },
+  {
+    "feature": "failures",
+    "importance": 0.0057,
+    "rank": 9
+  },
+  {
+    "feature": "Mjob",
+    "importance": 0.0055,
+    "rank": 10
+  },
+  {
+    "feature": "famrel",
+    "importance": 0.0053,
+    "rank": 11
+  },
+  {
+    "feature": "sex",
+    "importance": 0.0047,
+    "rank": 12
+  },
+  {
+    "feature": "Dalc",
+    "importance": 0.0047,
+    "rank": 13
+  },
+  {
+    "feature": "activities",
+    "importance": 0.0042,
+    "rank": 14
+  },
+  {
+    "feature": "goout",
+    "importance": 0.0038,
+    "rank": 15
+  },
+  {
+    "feature": "Walc",
+    "importance": 0.0036,
+    "rank": 16
+  },
+  {
+    "feature": "paid",
+    "importance": 0.0036,
+    "rank": 17
+  },
+  {
+    "feature": "famsup",
+    "importance": 0.0035,
+    "rank": 18
+  },
+  {
+    "feature": "Medu",
+    "importance": 0.0034,
+    "rank": 19
+  },
+  {
+    "feature": "schoolsup",
+    "importance": 0.0032,
+    "rank": 20
+  },
+  {
+    "feature": "famsize",
+    "importance": 0.0021,
+    "rank": 21
+  },
+  {
+    "feature": "studytime",
+    "importance": 0.002,
+    "rank": 22
+  },
+  {
+    "feature": "reason",
+    "importance": 0.0019,
+    "rank": 23
+  },
+  {
+    "feature": "nursery",
+    "importance": 0.0014,
+    "rank": 24
+  },
+  {
+    "feature": "internet",
+    "importance": 0.0013,
+    "rank": 25
+  },
+  {
+    "feature": "guardian",
+    "importance": 0.0012,
+    "rank": 26
+  },
+  {
+    "feature": "freetime",
+    "importance": 0.0007,
+    "rank": 27
+  },
+  {
+    "feature": "romantic",
+    "importance": 0.0004,
+    "rank": 28
+  },
+  {
+    "feature": "school",
+    "importance": 0.0004,
+    "rank": 29
+  },
+  {
+    "feature": "address",
+    "importance": 0.0001,
+    "rank": 30
+  },
+  {
+    "feature": "Pstatus",
+    "importance": 0.0,
+    "rank": 31
+  },
+  {
+    "feature": "higher",
+    "importance": 0.0,
+    "rank": 32
+  }
+]

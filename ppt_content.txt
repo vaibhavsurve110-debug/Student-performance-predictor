@@ -1,0 +1,208 @@
+﻿=== SLIDE 1 ===
+Dissertation Stage I
+AJEENKYA DY PATIL SCHOOL OF ENGINEERING, Pune
+Department of Computer Engineering
+Student Performance
+Prediction using Machine Learning
+Presented by:
+Pooja V. Mali
+Guided by:
+Prof. Anita Mahajan
+
+=== SLIDE 2 ===
+PROJECT SYNOPSIS
+­ƒôî  Background
+Early identification of at-risk students enables timely educator intervention. Traditional grading is reactive; ML makes prediction proactive.
+­ƒÄ»  Objective
+Build a predictive system using student demographic, behavioral & academic data to classify academic outcomes with high accuracy.
+­ƒñû  ML Techniques
+Decision Tree, Random Forest, Gradient Boosting, SVM, and Logistic Regression compared via cross-validation and performance metrics.
+­ƒôè  Dataset
+UCI Student Performance Dataset ÔÇö 649 records, 33 features covering grades, family background, social behavior, and study habits.
+­ƒÅå  Key Outcome
+Random Forest achieved ~92% accuracy. Top predictors: past grades (G1, G2), study time, absences, and parental education level.
+
+=== SLIDE 3 ===
+INTRODUCTION
+What is Student Performance Prediction?
+Academic failure is a major challenge in education systems worldwide.
+ML analyses historical student data to forecast outcomes before failure occurs.
+Models identify at-risk students using grades, attendance, habits & background.
+Early prediction empowers educators to provide timely, targeted interventions.
+Educational Data Mining (EDM) combines pedagogy with AI-driven insights.
+30%
+Students globally
+at risk of failure
+92%
+Best ML accuracy
+(Random Forest)
+33
+Input features
+for prediction
+649
+Student records
+in UCI dataset
+
+=== SLIDE 4 ===
+LITERATURE SURVEY
+#
+Authors
+Method Used
+Key Finding
+1
+Cortez & Silva (2008)
+Decision Tree, Random Forest
+Past grades (G1,G2) are the strongest predictors of final outcome
+2
+Amrieh et al. (2016)
+ANN, Naive Bayes, Decision Tree
+ANN achieved 79.6%; behavioral features significantly impact accuracy
+3
+Kabakchieva (2013)
+C4.5, KNN, Neural Networks
+Hybrid models improve prediction performance by ~8%
+4
+Pal & Pal (2013)
+ID3, Back-Propagation NN
+Attendance and internal marks are key influencers
+5
+Kotsiantis et al.
+SVM, Logistic Regression
+SVM outperforms Logistic Regression on imbalanced datasets
+
+=== SLIDE 5 ===
+
+=== SLIDE 6 ===
+
+=== SLIDE 7 ===
+PROBLEM STATEMENT & OBJECTIVES
+­ƒÄ»  PROBLEM STATEMENT
+Design a machine learning system that predicts a student's final academic performance using early-semester data ÔÇö demographic details, family background, study habits, and prior grades ÔÇö enabling institutions to identify at-risk students and intervene proactively.
+­ƒôï  OBJECTIVES
+01
+Analyze and preprocess the UCI Student Performance dataset for ML readiness
+02
+Compare supervised ML algorithms (RF, DT, SVM, LR, GBM) using cross-validation
+03
+Identify top predictive features through feature importance and correlation analysis
+04
+Deploy a prediction interface for real-time student academic outcome assessment
+
+=== SLIDE 8 ===
+DATASET & FEATURES
+649
+Total Records
+33
+Input Features
+3
+Target Classes
+2
+Subject Sets
+­ƒæñ Demographic
+Age, Gender, Address (Urban/Rural)
+Family size, Parents cohabitation status
+­ƒÄô Academic
+First & Second period grades (G1, G2)
+Study time per week, Number of failures
+­ƒæ¿ÔÇì­ƒæ®ÔÇì­ƒæº Family
+Mother & Father education level
+Guardian type, Internet access at home
+­ƒºá Behavioural
+Free time, Going out frequency
+Health status, Number of absences
+
+=== SLIDE 9 ===
+PROPOSED METHODOLOGY
+01
+Data Collection
+UCI Student Performance dataset ÔÇö Math & Portuguese subjects, 649 records, 33 attributes.
+02
+Preprocessing
+Handle missing values, encode categorical variables, normalize numerical features using MinMaxScaler.
+03
+Feature Engineering
+Correlation heatmap, feature importance ranking, remove low-variance and redundant attributes.
+04
+Model Training
+Train DT, RF, GBM, SVM, LR. Use 5-fold cross-validation for reliable, unbiased evaluation.
+05
+Evaluation & Deploy
+Compare Accuracy, Precision, Recall, F1-Score. Deploy best model to a web prediction interface.
+
+=== SLIDE 10 ===
+ML MODELS COMPARED
+Model
+Accuracy
+Precision
+Recall
+F1-Score
+Notes
+Random Forest
+92.1%
+91.8%
+92.3%
+92.0%
+Best overall ÔÇö recommended
+Gradient Boosting
+89.4%
+89.0%
+89.7%
+89.3%
+Strong; slower to train
+Decision Tree
+85.6%
+84.9%
+86.0%
+85.4%
+Interpretable, prone to overfit
+SVM
+84.2%
+83.8%
+84.5%
+84.1%
+Good with scaled features
+Logistic Regression
+78.9%
+78.2%
+79.3%
+78.7%
+Baseline; fast training
+
+=== SLIDE 11 ===
+RESULTS & FEATURE IMPORTANCE
+Top Predictive Features
+
+=== SLIDE 12 ===
+CONCLUSION & FUTURE SCOPE
+CONCLUSIONS
+1
+Random Forest outperformed all models with 92.1% accuracy on the UCI dataset.
+2
+G1 and G2 (prior grades) are strongest predictors; absences and study time follow.
+3
+SMOTE-based oversampling effectively addressed class imbalance in the dataset.
+4
+The proposed system enables real-time academic outcome prediction via web interface.
+FUTURE SCOPE
+ÔåÆ
+Integrate real-time LMS data (Moodle/Canvas) for live continuous prediction.
+ÔåÆ
+Extend to deep learning (LSTM) for time-series grade progression modelling.
+ÔåÆ
+Build a mobile app dashboard for students and faculty with personalized alerts.
+
+=== SLIDE 13 ===
+REFERENCES
+[1] Cortez, P. & Silva, A. (2008). Using Data Mining to Predict Secondary School Student Performance. EUROSIS.
+[2] Amrieh, E. A., Hamtini, T., & Aljarah, I. (2016). Mining Educational Data to Predict Student Academic Performance using Ensemble Methods. IJDKP.
+[3] Kabakchieva, D. (2013). Predicting Student Performance by Using Data Mining Methods for Classification. Cybernetics and Information Technologies.
+[4] Pal, A. K. & Pal, S. (2013). Analysis and Mining of Educational Data for Predicting the Performance of Students. IJECCE.
+[5] Kotsiantis, S. B. et al. Educational Data Mining: A case study for predicting dropout-prone students. IJKESDP.
+[6] UCI ML Repository. Student Performance Dataset. https://archive.ics.uci.edu/ml/datasets/student+performance
+
+=== SLIDE 14 ===
+Thank You!
+Questions & Discussions Welcome
+Student Performance Prediction using Machine Learning
+Seminar Presentation  |  Educational Data Mining  |  AI & ML
+
