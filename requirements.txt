@@ -16,3 +16,4 @@ shap
 xgboost
 google-generativeai
 streamlit-shap
+openpyxl
