@@ -22,7 +22,9 @@ from fastapi.middleware.cors import CORSMiddleware
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from backend.schemas import (
-    StudentInput, PredictionResponse, ModelMetrics, FeatureImportance
+    StudentInput, PredictionResponse, ModelMetrics, FeatureImportance,
+    ShareRequest, EmailShareRequest, LinkShareRequest, ShareResponse,
+    ActivityLogRequest
 )
 from backend import model as ml_model
 from backend import local_storage as storage
@@ -204,6 +206,120 @@ def clear_prediction_history():
     """Clear all stored prediction history."""
     storage.clear_history()
     return {"message": "Prediction history cleared.", "timestamp": datetime.now().isoformat()}
+
+
+@app.post("/share/init", response_model=ShareResponse, tags=["Sharing"])
+def initialize_sharing(req: ShareRequest):
+    """Initialize a shared report for a given prediction."""
+    try:
+        shared_id = storage.create_shared_report(req.prediction_id, req.owner_role)
+        return ShareResponse(success=True, message="Sharing initialized", data={"shared_report_id": shared_id})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/share/email", response_model=ShareResponse, tags=["Sharing"])
+def share_via_email(req: EmailShareRequest):
+    """Send report via email with PDF attachment."""
+    from backend.email_service import EmailService
+    from backend.export_engine import ExportEngine
+    
+    # Fetch report data for PDF attachment
+    records = storage.get_history(limit=100)
+    # We find the prediction linked to this shared_report_id
+    # For now, we'll assume we can get it from the shared_reports table
+    conn = storage._get_conn()
+    cursor = conn.execute('SELECT prediction_id FROM shared_reports WHERE id = ?', (req.shared_report_id,))
+    row = cursor.fetchone()
+    conn.close()
+    
+    pdf_bytes = None
+    if row:
+        prediction_id = row[0]
+        record = next((r for r in records if r["id"] == prediction_id), None)
+        if record:
+            pdf_bytes = ExportEngine.to_pdf(record["input"], record["result"])
+    
+    success = EmailService.send_report_email(
+        recipients=req.recipients,
+        subject=req.subject,
+        body=req.message or "Please find the student performance report attached.",
+        pdf_content=pdf_bytes
+    )
+    
+    status = "SENT" if success else "FAILED"
+    for recipient in req.recipients:
+        storage.log_email(req.shared_report_id, recipient, req.subject, status)
+    
+    if not success:
+        return ShareResponse(success=False, message="Email sending failed. Please check SMTP configuration.")
+        
+    return ShareResponse(success=True, message=f"Report shared with {len(req.recipients)} recipients.")
+
+
+@app.post("/share/link", response_model=ShareResponse, tags=["Sharing"])
+def generate_share_link(req: LinkShareRequest):
+    """Generate a tokenized public link."""
+    from datetime import timedelta
+    expires_at = (datetime.now() + timedelta(hours=req.expires_in_hours)).isoformat()
+    token = storage.generate_share_link(req.shared_report_id, expires_at, req.allow_download)
+    return ShareResponse(success=True, message="Link generated", data={"token": token, "expires_at": expires_at})
+
+
+@app.get("/share/public/{token}", tags=["Sharing"])
+def get_public_report(token: str):
+    """Public endpoint to view a shared report."""
+    report = storage.get_shared_report_by_token(token)
+    if not report:
+        raise HTTPException(status_code=404, detail="Link expired or invalid")
+    
+    storage.log_activity(report["shared_report_id"], "VIEW")
+    return report
+
+
+@app.get("/share/history", tags=["Sharing"])
+def get_sharing_history(limit: int = 50, role: str = "Administrator"):
+    """Retrieve history of shared reports."""
+    history = storage.get_share_history(limit=limit, role=role)
+    return {"history": history}
+
+
+@app.post("/share/log-activity", tags=["Sharing"])
+def log_share_activity(req: ActivityLogRequest):
+    """Log activity like Download or WhatsApp share."""
+    storage.log_activity(req.shared_report_id, req.action)
+    return {"status": "logged"}
+
+
+@app.get("/export/{fmt}/{prediction_id}", tags=["Sharing"])
+def export_report(fmt: str, prediction_id: str):
+    """Export a report in PDF or CSV format."""
+    from backend.export_engine import ExportEngine
+    from fastapi.responses import Response
+    
+    # Fetch prediction data
+    records = storage.get_history(limit=100) # Simple fetch from history
+    record = next((r for r in records if r["id"] == prediction_id), None)
+    
+    if not record:
+        raise HTTPException(status_code=404, detail="Report not found")
+    
+    if fmt == "pdf":
+        pdf_bytes = ExportEngine.to_pdf(record["input"], record["result"])
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename=report_{prediction_id}.pdf"}
+        )
+    elif fmt == "csv":
+        csv_str = ExportEngine.to_csv(record["input"], record["result"])
+        return Response(
+            content=csv_str,
+            media_type="text/csv",
+            headers={"Content-Disposition": f"attachment; filename=report_{prediction_id}.csv"}
+        )
+    else:
+        raise HTTPException(status_code=400, detail="Invalid format")
 
 
 if __name__ == "__main__":

@@ -153,15 +153,26 @@ curl -X POST http://localhost:8000/predict \
 
 ---
 
+## 📤 Report Sharing System
+
+The platform now includes a enterprise-grade sharing module:
+- **Email Sharing**: Send formatted reports directly to teachers/parents with full delivery logging.
+- **WhatsApp Integration**: Share quick summaries via WhatsApp Web or mobile app.
+- **Secure Public Links**: Generate tokenized URLs with optional expiry and download controls.
+- **PDF/CSV Export**: Professional automated PDF report generation for offline distribution.
+- **Audit Trails**: All sharing actions are logged in the database for administrative oversight.
+
+---
+
 ## 🖥️ Dashboard Pages
 
 | Page | Description |
 |---|---|
 | 🏠 Home | Project overview, key stats, performance classes |
-| 🔮 Predict | Input student data → get real-time AI prediction |
+| 🔮 Predict | Input student data → get real-time AI prediction + **Sharing Options** |
 | 📊 Model Comparison | Grouped bar chart of all model metrics |
 | 📈 Feature Importance | Horizontal bar chart of top predictors |
-| 📋 History | View & clear all past predictions |
+| 📋 History | View past predictions + **Global Share History** |
 
 ---
 

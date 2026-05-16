@@ -17,6 +17,10 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# ── Public Share Handling ──────────────────────────────────────────────────────
+query_params = st.query_params
+share_token = query_params.get("token")
+
 API_BASE = "http://localhost:8000"
 
 # ── Custom CSS (Modern SaaS / Linear Aesthetic) ────────────────────────────────
@@ -73,6 +77,165 @@ def api_post(endpoint, data):
         return r.json()
     except Exception as e:
         return {"error": str(e)}
+
+@st.dialog("Share Report")
+def show_share_modal(prediction_id, result_label, confidence):
+    st.markdown(f"### Share Report for {result_label}")
+    st.markdown(f"**Confidence:** {confidence}%")
+    
+    # Initialize sharing in backend
+    with st.spinner("Preparing sharing options..."):
+        init_res = api_post("/share/init", {"prediction_id": prediction_id, "owner_role": st.session_state.role})
+    
+    if "error" in init_res or not init_res.get("success"):
+        st.error("Could not initialize sharing. Please try again.")
+        return
+
+    shared_report_id = init_res["data"]["shared_report_id"]
+    
+    tab1, tab2, tab3, tab4 = st.tabs(["📧 Email", "💬 WhatsApp", "🔗 Public Link", "💾 Download"])
+    
+    report_text = f"🎓 Student Performance Prediction\nOutcome: {result_label}\nConfidence: {confidence}%"
+    import urllib.parse
+    encoded_report = urllib.parse.quote(report_text)
+
+    # ... (Email, WhatsApp, Link tabs logic remains the same)
+    
+    # NOTE: I need to handle the tabs properly. Since I'm replacing the whole tabs list, 
+    # I should include the content of the other tabs too if I'm using replace_file_content 
+    # on the whole block. Actually, I'll just append the new tab logic.
+
+    with tab1:
+        st.markdown("#### Send via Email")
+        emails = st.text_input("Recipients (comma separated)", placeholder="teacher@school.edu, parent@home.com")
+        subject = st.text_input("Subject", value=f"Student Performance Report - {result_label}")
+        message = st.text_area("Message Body", value=f"Hello,\n\nPlease find the prediction report for the student.\n\nResult: {result_label}\nConfidence: {confidence}%\n\nRegards,\n{st.session_state.role}")
+        
+        if st.button("Send Email", type="primary"):
+            if emails:
+                recipient_list = [e.strip() for e in emails.split(",")]
+                res = api_post("/share/email", {
+                    "shared_report_id": shared_report_id,
+                    "recipients": recipient_list,
+                    "subject": subject,
+                    "message": message
+                })
+                if "error" not in res and res.get("success"):
+                    st.success("✅ Report shared successfully via Email!")
+                    st.balloons()
+                else:
+                    st.error(f"❌ Failed to send: {res.get('error', 'Check SMTP settings')}")
+            else:
+                st.warning("Please enter at least one recipient.")
+
+    with tab2:
+        st.markdown("#### Share on WhatsApp")
+        st.info("Click the button below to open WhatsApp with a pre-filled message.")
+        wa_link = f"https://wa.me/?text={encoded_report}"
+        if st.markdown(f'<a href="{wa_link}" target="_blank" style="display:inline-block;background-color:#10b981;color:white;padding:10px 20px;border-radius:5px;text-decoration:none;font-weight:bold;text-align:center;width:100%;">Open WhatsApp</a>', unsafe_allow_html=True):
+            api_post("/share/log-activity", {"shared_report_id": shared_report_id, "action": "WHATSAPP"})
+
+    with tab3:
+        st.markdown("#### Public Shareable Link")
+        expiry = st.selectbox("Link Expiry", [1, 24, 168], format_func=lambda x: f"{x} hours" if x < 168 else "7 days")
+        allow_dl = st.checkbox("Allow Download", value=True)
+        
+        if st.button("Generate Link"):
+            res = api_post("/share/link", {
+                "shared_report_id": shared_report_id,
+                "expires_in_hours": expiry,
+                "allow_download": allow_dl
+            })
+            if "error" not in res:
+                token = res["data"]["token"]
+                # Use absolute URL if possible, otherwise relative
+                share_url = f"http://localhost:8501/?token={token}" # Localhost for now
+                st.success("Link generated!")
+                st.code(share_url, language="text")
+                st.info("Copy this link to share with anyone. They don't need to log in.")
+            else:
+                st.error(f"Error generating link: {res['error']}")
+
+    with tab4:
+        st.markdown("#### Export Report")
+        st.info("Download the report for offline use or physical distribution.")
+        
+        c1, c2 = st.columns(2)
+        with c1:
+            if st.button("📄 Download PDF", use_container_width=True):
+                # We can't use st.download_button easily inside a dialog button click 
+                # without pre-fetching, so we'll provide a direct link or fetch it.
+                r = requests.get(f"{API_BASE}/export/pdf/{prediction_id}")
+                if r.status_code == 200:
+                    st.download_button("Click here to save PDF", data=r.content, file_name=f"report_{prediction_id}.pdf", mime="application/pdf")
+                    api_post("/share/log-activity", {"shared_report_id": shared_report_id, "action": "DOWNLOAD_PDF"})
+                else:
+                    st.error("Failed to generate PDF.")
+        
+        with c2:
+            if st.button("📊 Download CSV", use_container_width=True):
+                r = requests.get(f"{API_BASE}/export/csv/{prediction_id}")
+                if r.status_code == 200:
+                    st.download_button("Click here to save CSV", data=r.content, file_name=f"report_{prediction_id}.csv", mime="text/csv")
+                    api_post("/share/log-activity", {"shared_report_id": shared_report_id, "action": "DOWNLOAD_CSV"})
+                else:
+                    st.error("Failed to generate CSV.")
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PUBLIC VIEW HANDLING
+# ══════════════════════════════════════════════════════════════════════════════
+if share_token:
+    st.markdown("""
+    <div class="hero-card">
+        <h1>Student Prediction Report</h1>
+        <p>This report was securely shared with you.</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    with st.spinner("Fetching report..."):
+        report = api_get(f"/share/public/{share_token}")
+        
+    if not report or "error" in report:
+        st.error("Invalid or expired share link.")
+        if st.button("Go to Dashboard"):
+            st.query_params.clear()
+            st.rerun()
+        st.stop()
+        
+    data = report["result"]
+    inp = report["input"]
+    
+    label = data.get("predicted_label","")
+    conf  = data.get("confidence", 0)
+    css   = {"Fail":"result-fail","Pass":"result-pass","Excellent":"result-excellent"}.get(label,"result-pass")
+
+    st.markdown(f"""
+    <div class="predict-result {css}">
+        <div class="result-label">{label}</div>
+        <div class="result-conf">Confidence: {conf}%</div>
+    </div>""", unsafe_allow_html=True)
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("**Prediction Context**")
+        st.write(f"**G1:** {inp.get('G1')} | **G2:** {inp.get('G2')} | **Absences:** {inp.get('absences')}")
+        st.write(f"**Study Time:** {inp.get('studytime')} | **Age:** {inp.get('age')}")
+        
+    with col2:
+        st.markdown("**Key Factors**")
+        top = data.get("top_features", [])[:5]
+        for item in top:
+            st.write(f"- {item['feature']}: {item['importance']:.2%}")
+
+    if report.get("allow_download"):
+        st.markdown("---")
+        # Provide CSV download as a simple version of "Download PDF"
+        df_exp = pd.DataFrame([inp])
+        csv = df_exp.to_csv(index=False).encode('utf-8')
+        st.download_button("Download Report Data (CSV)", data=csv, file_name=f"report_{share_token}.csv", mime="text/csv")
+
+    st.info("This is a read-only view. [Click here to login](http://localhost:8501)")
+    st.stop()
 
 # ══════════════════════════════════════════════════════════════════════════════
 # PAGE: HOME
@@ -155,6 +318,9 @@ elif page == "Predict":
 
         submitted = st.form_submit_button("Generate Prediction")
 
+    if "last_prediction" not in st.session_state:
+        st.session_state.last_prediction = None
+
     if submitted:
         payload = {
             "school": school, "sex": sex, "age": age, "address": address,
@@ -169,141 +335,135 @@ elif page == "Predict":
 
         with st.spinner("Running AI prediction..."):
             result = api_post("/predict", payload)
-
-        if "error" in result:
-            st.error(f"Error: {result['error']}\n\nMake sure the backend is running.")
-        else:
-            label = result.get("predicted_label","")
-            conf  = result.get("confidence", 0)
-            css   = {"Fail":"result-fail","Pass":"result-pass","Excellent":"result-excellent"}.get(label,"result-pass")
-
-            st.markdown(f"""
-            <div class="predict-result {css}">
-                <div class="result-label">{label}</div>
-                <div class="result-conf">Confidence: {conf}%</div>
-            </div>""", unsafe_allow_html=True)
-
-            col1, col2 = st.columns(2)
-            with col1:
-                st.markdown("**Class Probabilities**")
-                probs = result.get("probabilities", {})
-                colors = {"Fail":"#ef4444","Pass":"#f59e0b","Excellent":"#10b981"}
-                fig = go.Figure(go.Bar(
-                    x=list(probs.keys()), y=list(probs.values()),
-                    marker_color=[colors.get(k,"#ffffff") for k in probs.keys()],
-                    text=[f"{v}%" for v in probs.values()], textposition="auto"
-                ))
-                fig.update_layout(
-                    paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-                    font_color="#a1a1aa", yaxis_title="Probability (%)",
-                    showlegend=False, height=300, margin=dict(t=20,b=20)
-                )
-                st.plotly_chart(fig, use_container_width=True)
-
-            with col2:
-                st.markdown("**Key Influencing Factors**")
-                top = result.get("top_features", [])[:8]
-                if top:
-                    df_fi = pd.DataFrame(top)
-                    fig2 = go.Figure(go.Bar(
-                        y=df_fi["feature"], x=df_fi["importance"],
-                        orientation="h",
-                        marker_color="#fafafa",
-                    ))
-                    fig2.update_layout(
-                        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-                        font_color="#a1a1aa", height=300,
-                        margin=dict(t=20,b=20), yaxis=dict(autorange="reversed")
-                    )
-                    st.plotly_chart(fig2, use_container_width=True)
-
-            if label == "Fail":
-                st.error("Intervention Recommended: This student is at risk of failing.")
-            elif label == "Pass":
-                st.warning("On Track: Student is passing but has room for improvement.")
+            if "error" not in result:
+                st.session_state.last_prediction = result
             else:
-                st.success("Excellent Performance: Student is performing outstandingly.")
+                st.error(f"Error: {result['error']}\n\nMake sure the backend is running.")
 
-            # Explainable AI section
-            shap_data = result.get("shap_explanation", {})
-            if shap_data and "features" in shap_data and len(shap_data["features"]) > 0:
-                st.markdown('<div class="section-header">Explainable AI (SHAP)</div>', unsafe_allow_html=True)
-                st.markdown("<p style='color:#a1a1aa;'>How each feature specifically contributed to this student's prediction. Green bars push the prediction towards a higher grade, red bars push towards a lower grade.</p>", unsafe_allow_html=True)
-                
-                shap_df = pd.DataFrame(shap_data["features"])
-                shap_df["abs_value"] = shap_df["value"].abs()
-                shap_df = shap_df.sort_values(by="abs_value", ascending=True)
-                
-                colors_shap = ["#ef4444" if v < 0 else "#10b981" for v in shap_df["value"]]
-                
-                fig3 = go.Figure(go.Bar(
-                    y=shap_df["feature"], x=shap_df["value"],
+    if st.session_state.last_prediction:
+        result = st.session_state.last_prediction
+        label = result.get("predicted_label","")
+        conf  = result.get("confidence", 0)
+        css   = {"Fail":"result-fail","Pass":"result-pass","Excellent":"result-excellent"}.get(label,"result-pass")
+
+        st.markdown(f"""
+        <div class="predict-result {css}">
+            <div class="result-label">{label}</div>
+            <div class="result-conf">Confidence: {conf}%</div>
+        </div>""", unsafe_allow_html=True)
+
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("**Class Probabilities**")
+            probs = result.get("probabilities", {})
+            colors = {"Fail":"#ef4444","Pass":"#f59e0b","Excellent":"#10b981"}
+            fig = go.Figure(go.Bar(
+                x=list(probs.keys()), y=list(probs.values()),
+                marker_color=[colors.get(k,"#ffffff") for k in probs.keys()],
+                text=[f"{v}%" for v in probs.values()], textposition="auto"
+            ))
+            fig.update_layout(
+                paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+                font_color="#a1a1aa", yaxis_title="Probability (%)",
+                showlegend=False, height=300, margin=dict(t=20,b=20)
+            )
+            st.plotly_chart(fig, use_container_width=True)
+
+        with col2:
+            st.markdown("**Key Influencing Factors**")
+            top = result.get("top_features", [])[:8]
+            if top:
+                df_fi = pd.DataFrame(top)
+                fig2 = go.Figure(go.Bar(
+                    y=df_fi["feature"], x=df_fi["importance"],
                     orientation="h",
-                    marker_color=colors_shap,
-                    text=[f"{v:+.3f}" for v in shap_df["value"]], textposition="outside"
+                    marker_color="#fafafa",
                 ))
-                fig3.update_layout(
+                fig2.update_layout(
                     paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-                    font_color="#a1a1aa", height=400,
-                    margin=dict(t=20,b=20, l=100),
-                    xaxis_title="SHAP Value (Impact on Prediction)"
+                    font_color="#a1a1aa", height=300,
+                    margin=dict(t=20,b=20), yaxis=dict(autorange="reversed")
                 )
-                fig3.add_shape(type="line", x0=0, x1=0, y0=-1, y1=len(shap_df), line=dict(color="#27272a", width=2))
-                st.plotly_chart(fig3, use_container_width=True)
+                st.plotly_chart(fig2, use_container_width=True)
 
-            # AI Counselor
-            if "ai_counselor_plan" in result and result["ai_counselor_plan"]:
-                st.markdown('<div class="section-header">🧠 Prescriptive Analytics (AI Counselor)</div>', unsafe_allow_html=True)
-                st.info(result["ai_counselor_plan"])
+        if label == "Fail":
+            st.error("Intervention Recommended: This student is at risk of failing.")
+        elif label == "Pass":
+            st.warning("On Track: Student is passing but has room for improvement.")
+        else:
+            st.success("Excellent Performance: Student is performing outstandingly.")
 
-            # What-If Simulator
-            st.markdown('<div class="section-header">🎛️ What-If Simulator</div>', unsafe_allow_html=True)
-            st.markdown("<p style='color:#a1a1aa;'>Adjust key variables below to instantly see how interventions could change the outcome.</p>", unsafe_allow_html=True)
+        # Explainable AI section
+        shap_data = result.get("shap_explanation", {})
+        if shap_data and "features" in shap_data and len(shap_data["features"]) > 0:
+            st.markdown('<div class="section-header">Explainable AI (SHAP)</div>', unsafe_allow_html=True)
+            st.markdown("<p style='color:#a1a1aa;'>How each feature specifically contributed to this student's prediction. Green bars push the prediction towards a higher grade, red bars push towards a lower grade.</p>", unsafe_allow_html=True)
             
-            with st.form("what_if_form"):
-                w_col1, w_col2, w_col3 = st.columns(3)
-                new_study = w_col1.slider("Simulate Study Time", 1, 4, studytime, key="w_st")
-                new_abs = w_col2.slider("Simulate Absences", 0, 93, absences, key="w_ab")
-                new_g1 = w_col3.slider("Simulate G1", 0, 20, G1, key="w_g1")
-                sim_submit = st.form_submit_button("Run Simulation")
-                
-            if sim_submit:
-                sim_payload = payload.copy()
-                sim_payload["studytime"] = new_study
-                sim_payload["absences"] = new_abs
-                sim_payload["G1"] = new_g1
-                
-                with st.spinner("Simulating..."):
-                    sim_res = api_post("/predict", sim_payload)
-                    if "error" not in sim_res:
-                        s_label = sim_res.get("predicted_label","")
-                        s_conf = sim_res.get("confidence", 0)
-                        s_css = {"Fail":"result-fail","Pass":"result-pass","Excellent":"result-excellent"}.get(s_label,"result-pass")
-                        st.markdown(f'<div class="predict-result {s_css}"><div class="result-label">Simulated: {s_label}</div><div class="result-conf">{s_conf}% confidence</div></div>', unsafe_allow_html=True)
+            shap_df = pd.DataFrame(shap_data["features"])
+            shap_df["abs_value"] = shap_df["value"].abs()
+            shap_df = shap_df.sort_values(by="abs_value", ascending=True)
+            
+            colors_shap = ["#ef4444" if v < 0 else "#10b981" for v in shap_df["value"]]
+            
+            fig3 = go.Figure(go.Bar(
+                y=shap_df["feature"], x=shap_df["value"],
+                orientation="h",
+                marker_color=colors_shap,
+                text=[f"{v:+.3f}" for v in shap_df["value"]], textposition="outside"
+            ))
+            fig3.update_layout(
+                paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+                font_color="#a1a1aa", height=400,
+                margin=dict(t=20,b=20, l=100),
+                xaxis_title="SHAP Value (Impact on Prediction)"
+            )
+            fig3.add_shape(type="line", x0=0, x1=0, y0=-1, y1=len(shap_df), line=dict(color="#27272a", width=2))
+            st.plotly_chart(fig3, use_container_width=True)
 
-            # Share Report
-            st.markdown('<div class="section-header">📤 Share Report</div>', unsafe_allow_html=True)
+        # AI Counselor
+        if "ai_counselor_plan" in result and result["ai_counselor_plan"]:
+            st.markdown('<div class="section-header">🧠 Prescriptive Analytics (AI Counselor)</div>', unsafe_allow_html=True)
+            st.info(result["ai_counselor_plan"])
+
+        # What-If Simulator
+        st.markdown('<div class="section-header">🎛️ What-If Simulator</div>', unsafe_allow_html=True)
+        st.markdown("<p style='color:#a1a1aa;'>Adjust key variables below to instantly see how interventions could change the outcome.</p>", unsafe_allow_html=True)
+        
+        with st.form("what_if_form"):
+            w_col1, w_col2, w_col3 = st.columns(3)
+            # Use defaults from last prediction or form inputs
+            new_study = w_col1.slider("Simulate Study Time", 1, 4, studytime, key="w_st")
+            new_abs = w_col2.slider("Simulate Absences", 0, 93, absences, key="w_ab")
+            new_g1 = w_col3.slider("Simulate G1", 0, 20, G1, key="w_g1")
+            sim_submit = st.form_submit_button("Run Simulation")
             
-            import urllib.parse
-            report_text = f"🎓 *Student Performance Prediction Report*\n\n"
-            report_text += f"Outcome: *{label}*\n"
-            report_text += f"Confidence: {conf}%\n\n"
-            if 'top' in locals() and top:
-                report_text += "Top Factors:\n"
-                for idx, item in enumerate(top[:3]):
-                    report_text += f"{idx+1}. {item['feature']} ({item['importance']*100:.1f}%)\n"
-            report_text += "\nGenerated by Student Performance Predictor AI."
-            
-            encoded_report = urllib.parse.quote(report_text)
-            
-            email_link = f"mailto:?subject=Student%20Prediction%20Report&body={encoded_report}"
-            whatsapp_link = f"https://wa.me/?text={encoded_report}"
-            
-            col_s1, col_s2, _ = st.columns([1, 1, 2])
-            with col_s1:
-                st.markdown(f'<a href="{email_link}" target="_blank" style="display:inline-block;background-color:#3b82f6;color:white;padding:10px 20px;border-radius:5px;text-decoration:none;font-weight:bold;text-align:center;width:100%;">📧 Share via Email</a>', unsafe_allow_html=True)
-            with col_s2:
-                st.markdown(f'<a href="{whatsapp_link}" target="_blank" style="display:inline-block;background-color:#10b981;color:white;padding:10px 20px;border-radius:5px;text-decoration:none;font-weight:bold;text-align:center;width:100%;">💬 Share via WhatsApp</a>', unsafe_allow_html=True)
+        if sim_submit:
+            # Note: payload here depends on form variables school, sex etc.
+            sim_payload = {
+                "school": school, "sex": sex, "age": age, "address": address,
+                "famsize": famsize, "Pstatus": Pstatus, "Medu": Medu, "Fedu": Fedu,
+                "Mjob": Mjob, "Fjob": Fjob, "reason": "course", "guardian": "mother",
+                "traveltime": 1, "studytime": new_study, "failures": failures,
+                "schoolsup": "no", "famsup": "yes", "paid": "no", "activities": "no",
+                "nursery": "yes", "higher": higher, "internet": internet, "romantic": "no",
+                "famrel": 4, "freetime": 3, "goout": goout, "Dalc": 1, "Walc": 1,
+                "health": health, "absences": new_abs, "G1": new_g1, "G2": G2,
+            }
+            with st.spinner("Simulating..."):
+                sim_res = api_post("/predict", sim_payload)
+                if "error" not in sim_res:
+                    s_label = sim_res.get("predicted_label","")
+                    s_conf = sim_res.get("confidence", 0)
+                    s_css = {"Fail":"result-fail","Pass":"result-pass","Excellent":"result-excellent"}.get(s_label,"result-pass")
+                    st.markdown(f'<div class="predict-result {s_css}"><div class="result-label">Simulated: {s_label}</div><div class="result-conf">{s_conf}% confidence</div></div>', unsafe_allow_html=True)
+
+        # Share Report
+        st.markdown('<div class="section-header">📤 Report Sharing</div>', unsafe_allow_html=True)
+        
+        col_s1, _ = st.columns([1, 2])
+        with col_s1:
+            if st.button("🚀 Share Analysis", type="primary", key="share_btn", use_container_width=True):
+                show_share_modal(result.get("student_id"), label, conf)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # PAGE: MODEL COMPARISON
@@ -440,6 +600,25 @@ elif page == "History":
             height=350, margin=dict(t=20, b=20)
         )
         st.plotly_chart(fig, use_container_width=True)
+
+        # Shared Reports History
+        st.markdown('<div class="section-header">🌍 Shared Reports History</div>', unsafe_allow_html=True)
+        share_data = api_get(f"/share/history?limit=20&role={st.session_state.role}")
+        shares = share_data.get("history", []) if share_data else []
+        
+        if not shares:
+            st.info("No reports shared yet.")
+        else:
+            share_rows = []
+            for s in shares:
+                share_rows.append({
+                    "Shared At": s.get("timestamp")[:16].replace("T", " "),
+                    "Prediction ID": s.get("prediction_id"),
+                    "Shared By": s.get("owner"),
+                    "Outcome": s.get("label"),
+                    "Link": "Active"
+                })
+            st.table(pd.DataFrame(share_rows))
 
 # ══════════════════════════════════════════════════════════════════════════════
 # PAGE: BULK ANALYSIS

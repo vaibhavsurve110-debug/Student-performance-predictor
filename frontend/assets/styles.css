@@ -75,3 +75,47 @@ label { color: #a1a1aa !important; font-size: 0.85rem !important; font-weight: 5
 
 /* Dividers */
 hr { border-color: #27272a; }
+
+/* Sharing System Enhancements */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 8px;
+    background-color: transparent;
+}
+.stTabs [data-baseweb="tab"] {
+    background-color: #18181b;
+    border: 1px solid #27272a;
+    border-radius: 8px 8px 0 0;
+    padding: 10px 20px;
+    color: #a1a1aa;
+}
+.stTabs [aria-selected="true"] {
+    background-color: #27272a !important;
+    color: #fafafa !important;
+    border-bottom: 2px solid #fafafa !important;
+}
+
+/* Success Animations */
+@keyframes fadeInScale {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+.share-success {
+    animation: fadeInScale 0.3s ease-out;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid #10b981;
+    border-radius: 8px;
+    padding: 16px;
+    color: #10b981;
+    margin: 16px 0;
+}
+
+/* Code block for sharing link */
+code {
+    background-color: #18181b !important;
+    color: #3b82f6 !important;
+    border: 1px solid #27272a !important;
+    padding: 12px !important;
+    border-radius: 8px !important;
+    display: block;
+    word-break: break-all;
+}

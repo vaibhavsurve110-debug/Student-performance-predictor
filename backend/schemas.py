@@ -86,3 +86,32 @@ class HistoryRecord(BaseModel):
     input: dict
     result: PredictionResponse
     timestamp: str
+
+
+class ShareRequest(BaseModel):
+    prediction_id: str
+    owner_role: str
+
+
+class EmailShareRequest(BaseModel):
+    shared_report_id: str
+    recipients: List[str]
+    subject: Optional[str] = "Student Performance Prediction Report"
+    message: Optional[str] = None
+
+
+class LinkShareRequest(BaseModel):
+    shared_report_id: str
+    expires_in_hours: Optional[int] = 24
+    allow_download: bool = True
+
+
+class ShareResponse(BaseModel):
+    success: bool
+    message: str
+    data: Optional[dict] = None
+
+
+class ActivityLogRequest(BaseModel):
+    shared_report_id: str
+    action: str
